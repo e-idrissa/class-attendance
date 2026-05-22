@@ -9,8 +9,11 @@
  */
 
 import type * as auth from "../auth.js";
+import type * as fx_profile from "../fx/profile.js";
+import type * as fx_usernames from "../fx/usernames.js";
+import type * as fx_users from "../fx/users.js";
 import type * as http from "../http.js";
-import type * as myFunctions from "../myFunctions.js";
+import type * as utils from "../utils.js";
 
 import type {
   ApiFromModules,
@@ -20,8 +23,11 @@ import type {
 
 declare const fullApi: ApiFromModules<{
   auth: typeof auth;
+  "fx/profile": typeof fx_profile;
+  "fx/usernames": typeof fx_usernames;
+  "fx/users": typeof fx_users;
   http: typeof http;
-  myFunctions: typeof myFunctions;
+  utils: typeof utils;
 }>;
 
 /**
