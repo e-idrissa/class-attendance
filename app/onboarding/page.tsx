@@ -20,13 +20,16 @@ const OnboardingPage = () => {
     isAuthenticated ? {} : "skip",
   );
 
-  // useEffect(() => {
-  //   if (authLoading) return;
-  //   if (!isAuthenticated) {
-  //     router.replace("/signin");
-  //     return;
-  //   }
-  // }, [authLoading, isAuthenticated, data, router]);
+  useEffect(() => {
+    if (authLoading) return;
+    if (!isAuthenticated) {
+      router.replace("/signin");
+      return;
+    }
+    if (data !== undefined && data !== null && isOnboardingComplete(data.profile)) {
+      router.replace("/");
+    }
+  }, [authLoading, isAuthenticated, data, router]);
 
   if (authLoading || (isAuthenticated && data === undefined)) {
     return (
@@ -35,19 +38,9 @@ const OnboardingPage = () => {
       </div>
     );
   }
-  
-  if (!isAuthenticated) {
-    router.replace("/signin")
-    return
-  }
 
-  if (!isAuthenticated || data === null || data === undefined) {
+  if (!isAuthenticated || data === null || data === undefined || isOnboardingComplete(data.profile)) {
     return null;
-  }
-  
-  
-  if (data !== undefined && data !== null && isOnboardingComplete(data.profile)) {
-    return router.replace("/");
   }
 
   const { user, profile } = data;

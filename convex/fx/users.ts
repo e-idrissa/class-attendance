@@ -1,5 +1,27 @@
 import { query } from "../_generated/server";
 import { getAuthUserId } from "@convex-dev/auth/server";
+import { normalizeUsername } from "../utils";
+import { v } from "convex/values";
+
+/** Specified user's `users` document */
+export const getUserEmailByUsername = query({
+  args: {
+    username: v.string(),
+  },
+
+  handler: async (ctx, args) => {
+    const username = normalizeUsername(args.username);
+
+    const user = await ctx.db
+      .query("users")
+      .withIndex("by_username", (q) =>
+        q.eq("username", username)
+      )
+      .unique();
+
+    return user?.email ?? null;
+  },
+});
 
 /** Authenticated user's `users` document, or null if signed out. */
 export const currentUser = query({

@@ -6,9 +6,13 @@ import { cn } from "@/lib/utils";
 
 import ConvexClientProvider from "@/providers/ConvexClientProvider";
 
-import { Toaster } from "@/components/ui/sonner"
+import { Toaster } from "@/components/ui/sonner";
+import { TooltipProvider } from "@/components/ui/tooltip";
 
-const instrumentSans = Instrument_Sans({subsets:['latin'],variable:'--font-sans'});
+const instrumentSans = Instrument_Sans({
+  subsets: ["latin"],
+  variable: "--font-sans",
+});
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -40,7 +44,7 @@ export default function RootLayout({
           className={`${geistSans.variable} ${geistMono.variable} antialiased bg-gray-50`}
         >
           <ConvexClientProvider>
-            {children}
+            <TooltipProvider>{children}</TooltipProvider>
             <Toaster />
           </ConvexClientProvider>
         </body>

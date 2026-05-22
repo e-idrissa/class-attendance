@@ -1,14 +1,20 @@
 "use client";
 
-import { useEffect } from "react";
-import { api } from "@/convex/_generated/api";
-import { isOnboardingComplete } from "@/lib/profile";
-import { useConvexAuth, useQuery } from "convex/react";
-import { useAuthActions } from "@convex-dev/auth/react";
-import { useRouter } from "next/navigation";
-import { Button } from "@/components/ui/button";
+import { AppSidebar } from "@/features/dashboard/app-sidebar"
+import { ChartAreaInteractive } from "@/features/dashboard/chart-area-interactive"
+import { DataTable } from "@/features/dashboard/data-table"
+import { SectionCards } from "@/features/dashboard/section-cards"
+import { SiteHeader } from "@/features/dashboard/site-header"
+import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar"
 
-const Home = () => {
+import tableData from "./data.json"
+import { useRouter } from "next/navigation"
+import { useConvexAuth, useQuery } from "convex/react"
+import { api } from "@/convex/_generated/api"
+import { isOnboardingComplete } from "@/lib/profile"
+import { useEffect } from "react"
+
+export default function DashboardPage() {
   const router = useRouter();
   const { isAuthenticated } = useConvexAuth();
   const data = useQuery(
@@ -21,35 +27,31 @@ const Home = () => {
       router.replace("/onboarding");
     }
   }, [data, router]);
-
+  
   return (
-    <div>
-      Welcome Back 
-      <SignOutButton />
-    </div>
-  );
+    <SidebarProvider
+      style={
+        {
+          "--sidebar-width": "calc(var(--spacing) * 72)",
+          "--header-height": "calc(var(--spacing) * 12)",
+        } as React.CSSProperties
+      }
+    >
+      <AppSidebar variant="inset" />
+      <SidebarInset>
+        <SiteHeader />
+        <div className="flex flex-1 flex-col">
+          <div className="@container/main flex flex-1 flex-col gap-2">
+            <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
+              <SectionCards />
+              <div className="px-4 lg:px-6">
+                <ChartAreaInteractive />
+              </div>
+              <DataTable data={tableData} />
+            </div>
+          </div>
+        </div>
+      </SidebarInset>
+    </SidebarProvider>
+  )
 }
-
-function SignOutButton() {
-  const { isAuthenticated } = useConvexAuth();
-  const { signOut } = useAuthActions();
-  const router = useRouter();
-  return (
-    <>
-      {isAuthenticated && (
-        <Button
-          className="bg-slate-600 hover:bg-slate-700 dark:bg-slate-700 dark:hover:bg-slate-600 text-white rounded-lg px-4 py-2 text-sm font-medium transition-all duration-200 shadow-sm hover:shadow-md cursor-pointer"
-          onClick={() =>
-            void signOut().then(() => {
-              router.push("/signin");
-            })
-          }
-        >
-          Sign out
-        </Button>
-      )}
-    </>
-  );
-}
-
-export default Home

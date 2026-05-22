@@ -12,7 +12,7 @@ export const isUsernameAvailable = query({
     }
     const existing = await ctx.db
       .query("users")
-      .withIndex("username", (q) => q.eq("username", normalized))
+      .withIndex("by_username", (q) => q.eq("username", normalized))
       .first();
     return {
       available: existing === null,

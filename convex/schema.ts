@@ -16,9 +16,9 @@ export default defineSchema({
     isAnonymous: v.optional(v.boolean()),
     username: v.optional(v.string()),
   })
-    .index("email", ["email"])
-    .index("phone", ["phone"])
-    .index("username", ["username"]),
+    .index("by_email", ["email"])
+    .index("by_phone", ["phone"])
+    .index("by_username", ["username"]),
 
   logs: defineTable({
     tag: v.string(),

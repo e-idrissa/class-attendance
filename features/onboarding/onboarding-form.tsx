@@ -7,16 +7,12 @@ import { useRouter } from "next/navigation";
 import { useMutation } from "convex/react";
 
 import { api } from "@/convex/_generated/api";
-import { Id } from "@/convex/_generated/dataModel";
 import { systemRoles } from "@/lib/constants";
 import { standardSchemaResolver } from "@hookform/resolvers/standard-schema";
 import { HugeiconsIcon } from "@hugeicons/react";
 import {
   Contact02Icon,
-  Envelope,
-  Key01Icon,
   Shield01Icon,
-  Telephone,
   User03Icon,
 } from "@hugeicons/core-free-icons";
 
@@ -44,7 +40,6 @@ import {
 import { Badge } from "@/components/ui/badge";
 
 interface Props {
-  id: Id<"users">;
   role: string;
 }
 
@@ -61,7 +56,7 @@ const formSchema = z.object({
     .max(9, { message: "Telephone must have 9 characters" }),
 });
 
-export const OnboardingForm = ({ id: _id, role }: Props) => {
+export const OnboardingForm = ({ role }: Props) => {
   const router = useRouter();
   const createProfile = useMutation(api.fx.profile.create);
   const updateProfile = useMutation(api.fx.profile.update);
@@ -122,11 +117,19 @@ export const OnboardingForm = ({ id: _id, role }: Props) => {
       >
         <CardContent className="flex items-start gap-6">
           <div className="flex flex-col items-center gap-4 rounded-lg">
-            <div className="flex items-center justify-center bg-gray-100 p-4 rounded-xl">
+            <div className="hidden lg:flex items-center justify-center bg-gray-100 p-4 rounded-xl">
               <HugeiconsIcon
                 icon={User03Icon}
                 size={96}
                 strokeWidth={1}
+                className="transition-colors"
+              />
+            </div>
+            <div className="flex lg:hidden items-center justify-center bg-gray-100 p-4 rounded-xl">
+              <HugeiconsIcon
+                icon={User03Icon}
+                size={48}
+                strokeWidth={1.2}
                 className="transition-colors"
               />
             </div>
@@ -137,7 +140,7 @@ export const OnboardingForm = ({ id: _id, role }: Props) => {
                 strokeWidth={2}
                 className="transition-colors"
               />
-              <span>{role}</span>
+              <span className="lowercase">{role}</span>
             </Badge>
           </div>
           <FieldGroup>
