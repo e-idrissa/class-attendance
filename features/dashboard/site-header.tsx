@@ -1,21 +1,25 @@
-"use client"
+"use client";
 
-import { usePathname } from "next/navigation"
-import { Separator } from "@/components/ui/separator"
-import { SidebarTrigger } from "@/components/ui/sidebar"
+import { usePathname } from "next/navigation";
+import { Separator } from "@/components/ui/separator";
+import { SidebarTrigger } from "@/components/ui/sidebar";
 
 export function SiteHeader() {
-  const pathname = usePathname()
+  const pathname = usePathname();
 
   const getPageTitle = () => {
-    if (!pathname || pathname === "/") return "Dashboard"
-    const segments = pathname.split("/").filter(Boolean)
-    const firstSegment = segments[0]
+    if (!pathname || pathname === "/") return "Dashboard";
+    const segments = pathname.split("/").filter(Boolean);
+    const firstSegment = segments[0];
+
+    // CRITICAL FIX: If the array was empty (e.g., "///"), firstSegment is undefined.
+    // We fall back to "Dashboard" before running any string operations.
+    if (!firstSegment) return "Dashboard";
 
     return firstSegment
       .replace(/[-_]/g, " ")
-      .replace(/^\w/, (c) => c.toUpperCase())
-  }
+      .replace(/^\w/, (c) => c.toUpperCase());
+  };
 
   return (
     <header className="flex h-(--header-height) shrink-0 items-center gap-2 border-b transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-(--header-height)">
@@ -28,5 +32,5 @@ export function SiteHeader() {
         <h1 className="text-base font-medium">{getPageTitle()}</h1>
       </div>
     </header>
-  )
+  );
 }
