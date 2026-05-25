@@ -22,12 +22,12 @@ export default defineSchema({
 
   logs: defineTable({
     tag: v.string(),
-    author: v.string(),
+    author: v.id("users"),
     date: v.string(),
     time: v.string(),
     status: v.union(v.literal("SUCCESS"), v.literal("FAILED")),
     data: v.object({
-      attendanceSlug: v.string(),
+      collectionIdentifier: v.string(),
     }),
   }).index("by_date", ["date"]),
 

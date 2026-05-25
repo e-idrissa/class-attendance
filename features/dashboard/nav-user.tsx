@@ -40,6 +40,8 @@ export function NavUser({
 }) {
   const { isMobile } = useSidebar();
 
+  const router = useRouter()
+
   const name = `${user.firstName} ${user.lastName}`
   const fallback = `${user.firstName[0]}${user.lastName[0]}`
 
@@ -92,7 +94,7 @@ export function NavUser({
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem>
+              <DropdownMenuItem onClick={() => router.push("/profile")}>
                 <HugeiconsIcon icon={UserCircle02Icon} strokeWidth={2} />
                 Account
               </DropdownMenuItem>
@@ -117,7 +119,9 @@ export function NavUser({
 function SignOutButton() {
   const { isAuthenticated } = useConvexAuth();
   const { signOut } = useAuthActions();
+
   const router = useRouter();
+
   return (
     <>
       {isAuthenticated && (

@@ -24,3 +24,21 @@ export const systemRoles = {
    shepherd: "SHEPHERD",
    student: "STUDENT"
 }
+
+export const classesData = [
+   {
+     id: "1",
+     title: "Classe de priere",
+     count: 5,
+   },
+   {
+     id: "2",
+     title: "Classe de priere",
+     count: 5,
+   },
+   {
+     id: "3",
+     title: "Classe de priere",
+     count: 5,
+   },
+ ];

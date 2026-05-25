@@ -4,10 +4,12 @@ import { useState } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { z } from "zod";
 import { toast } from "sonner";
-import { useAuthActions } from "@convex-dev/auth/react";
 import { useRouter } from "next/navigation";
-import { standardSchemaResolver } from "@hookform/resolvers/standard-schema";
+import { useConvex } from "convex/react";
 
+import { api } from "@/convex/_generated/api";
+import { useAuthActions } from "@convex-dev/auth/react";
+import { standardSchemaResolver } from "@hookform/resolvers/standard-schema";
 import { HugeiconsIcon } from "@hugeicons/react";
 import {
   Envelope,
@@ -15,6 +17,7 @@ import {
   User03Icon,
   Tick01Icon,
 } from "@hugeicons/core-free-icons";
+
 import { Spinner } from "@/components/ui/spinner";
 import { Button } from "@/components/ui/button";
 import {
@@ -36,8 +39,6 @@ import {
   InputGroupAddon,
   InputGroupInput,
 } from "@/components/ui/input-group";
-import { useConvex } from "convex/react";
-import { api } from "@/convex/_generated/api";
 
 const usernameSchema = z
   .string()
@@ -208,7 +209,7 @@ export const SignInForm = () => {
   return (
     <Card className="w-full sm:max-w-96">
       <CardHeader className="flex flex-col items-center">
-        <CardTitle>{getTitle()}</CardTitle>
+        <CardTitle className="text-xl font-semibold">{getTitle()}</CardTitle>
         <CardDescription>{getDescription()}</CardDescription>
       </CardHeader>
       <form

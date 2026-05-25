@@ -36,7 +36,7 @@ const data = {
   navMain: [
     {
       title: "Dashboard",
-      url: "#",
+      url: "/",
       icon: <HugeiconsIcon icon={DashboardSquare01Icon} strokeWidth={2} />,
     },
     {
