@@ -25,8 +25,9 @@ import {
   Logout01Icon,
 } from "@hugeicons/core-free-icons";
 import { useAuthActions } from "@convex-dev/auth/react";
-import { useConvexAuth } from "convex/react";
+import { useConvexAuth, useMutation } from "convex/react";
 import { useRouter } from "next/navigation";
+import { api } from "@/convex/_generated/api";
 
 export function NavUser({
   user,
@@ -119,6 +120,7 @@ export function NavUser({
 function SignOutButton() {
   const { isAuthenticated } = useConvexAuth();
   const { signOut } = useAuthActions();
+  const logMutation = useMutation(api.fx.logs.createLog);
 
   const router = useRouter();
 
@@ -126,11 +128,12 @@ function SignOutButton() {
     <>
       {isAuthenticated && (
         <DropdownMenuItem
-          onClick={() =>
+          onClick={async () => {
+            await logMutation({ tag: "SIGN_OUT", status: "SUCCESS" });
             void signOut().then(() => {
               router.push("/signin");
-            })
-          }
+            });
+          }}
         >
           <HugeiconsIcon icon={Logout01Icon} strokeWidth={2} />
           Log out

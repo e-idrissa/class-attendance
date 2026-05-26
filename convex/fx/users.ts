@@ -57,3 +57,29 @@ export const currentUserWithProfile = query({
     return { user, profile };
   },
 });
+
+/** Retrieve user ID by email or username (internal helper for logging) */
+export const getUserIdByIdentifier = query({
+  args: {
+    identifier: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const identifier = normalizeUsername(args.identifier);
+
+    // Try username first
+    const byUsername = await ctx.db
+      .query("users")
+      .withIndex("by_username", (q) => q.eq("username", identifier))
+      .unique();
+
+    if (byUsername) return byUsername._id;
+
+    // Then try email
+    const byEmail = await ctx.db
+      .query("users")
+      .withIndex("by_email", (q) => q.eq("email", identifier))
+      .unique();
+
+    return byEmail?._id ?? null;
+  },
+});

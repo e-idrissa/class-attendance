@@ -29,7 +29,9 @@ export default defineSchema({
     data: v.object({
       collectionIdentifier: v.string(),
     }),
-  }).index("by_date", ["date"]),
+  })
+    .index("by_date", ["date"])
+    .index("by_author_date", ["author", "date"]),
 
   profiles: defineTable({
     userId: v.id("users"),

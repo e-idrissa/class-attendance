@@ -15,6 +15,8 @@ const ProfilePage = () => {
     return <Spinner />;
   }
 
+  // TODO : update profile fx and logs
+
   const { user, profile } = data;
 
   return (

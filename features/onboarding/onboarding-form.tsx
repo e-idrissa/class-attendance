@@ -60,6 +60,7 @@ export const OnboardingForm = ({ role }: Props) => {
   const router = useRouter();
   const createProfile = useMutation(api.fx.profile.create);
   const updateProfile = useMutation(api.fx.profile.update);
+  const logMutation = useMutation(api.fx.logs.createLog);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: standardSchemaResolver(formSchema),
@@ -93,9 +94,19 @@ export const OnboardingForm = ({ role }: Props) => {
         telephone: data.telephone,
       });
 
+      await logMutation({
+        tag: "ONBOARDING",
+        status: "SUCCESS",
+        collectionIdentifier: "collectionIdentifier",
+      });
       toast.success("Profile saved");
       router.replace("/");
     } catch (error) {
+      await logMutation({
+        tag: "ONBOARDING",
+        status: "FAILED",
+        collectionIdentifier: "collectionIdentifier",
+      });
       const message =
         error instanceof Error
           ? error.message

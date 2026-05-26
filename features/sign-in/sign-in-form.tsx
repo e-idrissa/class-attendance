@@ -5,7 +5,7 @@ import { useForm, Controller } from "react-hook-form";
 import { z } from "zod";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
-import { useConvex } from "convex/react";
+import { useConvex, useMutation } from "convex/react";
 
 import { api } from "@/convex/_generated/api";
 import { useAuthActions } from "@convex-dev/auth/react";
@@ -80,6 +80,7 @@ export const SignInForm = () => {
   const { signIn } = useAuthActions();
   const router = useRouter();
   const convex = useConvex();
+  const logMutation = useMutation(api.fx.logs.createLog);
 
   const [flow, setFlow] = useState<AuthFlow>("signIn");
   const [error, setError] = useState<string | null>(null);
@@ -120,16 +121,21 @@ export const SignInForm = () => {
 
       // Reset verification
       if (flow === "resetVerification") {
-        await signIn("password", {
-          email: data.email!,
-          code: data.code!,
-          newPassword: data.newPassword!,
-          flow: "reset-verification",
-        });
+        try {
+          await signIn("password", {
+            email: data.email!,
+            code: data.code!,
+            newPassword: data.newPassword!,
+            flow: "reset-verification",
+          });
 
-        toast.success("Password reset successfully. You can now sign in.");
-
-        setFlow("signIn");
+          await logMutation({ tag: "PASSWORD_RESET", status: "SUCCESS" });
+          toast.success("Password reset successfully. You can now sign in.");
+          setFlow("signIn");
+        } catch (err) {
+          await logMutation({ tag: "PASSWORD_RESET", status: "FAILED" });
+          throw err;
+        }
 
         return;
       }
@@ -154,7 +160,7 @@ export const SignInForm = () => {
       }
 
       const params: Record<string, string> = {
-        email,
+        email: email || data.email || "",
         flow,
       };
 
@@ -166,7 +172,32 @@ export const SignInForm = () => {
         params.password = data.password;
       }
 
-      await signIn("password", params);
+      try {
+        await signIn("password", params);
+        // On success, the session is established, so logMutation will capture getAuthUserId
+        const identifier = params["username"];
+        const userId = await convex.query(api.fx.users.getUserIdByIdentifier, {
+          identifier,
+        });
+        await logMutation({
+          tag: "SIGN_IN",
+          status: "SUCCESS",
+          userId: userId || undefined,
+        });
+      } catch (err) {
+        // On failure, try to find the userId to attribute the log
+        const identifier = data.username || data.email || "";
+        const userId = await convex.query(api.fx.users.getUserIdByIdentifier, {
+          identifier,
+        });
+
+        await logMutation({
+          tag: "SIGN_IN",
+          status: "FAILED",
+          userId: userId || undefined,
+        });
+        throw err;
+      }
 
       router.replace("/onboarding");
     } catch (err) {
@@ -255,7 +286,9 @@ export const SignInForm = () => {
               />
             )}
 
-            {(flow === "resetVerification" || flow === "signUp" || flow === "forgotPassword") && (
+            {(flow === "resetVerification" ||
+              flow === "signUp" ||
+              flow === "forgotPassword") && (
               <Controller
                 name="email"
                 control={control}
