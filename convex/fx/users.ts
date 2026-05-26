@@ -124,6 +124,8 @@ export const createUser = mutation({
       role: ["STUDENT"],
     });
 
+    // TODO: Send an email to the user after creation with the signinWithParams link (/sigin?strategy=create)
+
     return userId;
   },
 });
