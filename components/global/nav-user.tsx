@@ -25,8 +25,9 @@ import {
   Logout01Icon,
 } from "@hugeicons/core-free-icons";
 import { useAuthActions } from "@convex-dev/auth/react";
-import { useConvexAuth } from "convex/react";
+import { useConvexAuth, useMutation } from "convex/react";
 import { useRouter } from "next/navigation";
+import { api } from "@/convex/_generated/api";
 
 export function NavUser({
   user,
@@ -39,6 +40,8 @@ export function NavUser({
   };
 }) {
   const { isMobile } = useSidebar();
+
+  const router = useRouter()
 
   const name = `${user.firstName} ${user.lastName}`
   const fallback = `${user.firstName[0]}${user.lastName[0]}`
@@ -53,7 +56,6 @@ export function NavUser({
             }
           >
             <Avatar className="size-8 rounded-lg grayscale">
-              <AvatarImage src={user.avatar} alt={user.firstName} />
               <AvatarFallback className="rounded-lg">{fallback}</AvatarFallback>
             </Avatar>
             <div className="grid flex-1 text-left text-sm leading-tight">
@@ -92,7 +94,7 @@ export function NavUser({
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem>
+              <DropdownMenuItem onClick={() => router.push("/profile")}>
                 <HugeiconsIcon icon={UserCircle02Icon} strokeWidth={2} />
                 Account
               </DropdownMenuItem>
@@ -117,16 +119,20 @@ export function NavUser({
 function SignOutButton() {
   const { isAuthenticated } = useConvexAuth();
   const { signOut } = useAuthActions();
+  const logMutation = useMutation(api.fx.logs.createLog);
+
   const router = useRouter();
+
   return (
     <>
       {isAuthenticated && (
         <DropdownMenuItem
-          onClick={() =>
+          onClick={async () => {
+            await logMutation({ tag: "SIGN_OUT", status: "SUCCESS" });
             void signOut().then(() => {
               router.push("/signin");
-            })
-          }
+            });
+          }}
         >
           <HugeiconsIcon icon={Logout01Icon} strokeWidth={2} />
           Log out

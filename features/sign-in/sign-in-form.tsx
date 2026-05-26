@@ -4,10 +4,12 @@ import { useState } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { z } from "zod";
 import { toast } from "sonner";
-import { useAuthActions } from "@convex-dev/auth/react";
-import { useRouter } from "next/navigation";
-import { standardSchemaResolver } from "@hookform/resolvers/standard-schema";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useConvex, useMutation } from "convex/react";
 
+import { api } from "@/convex/_generated/api";
+import { useAuthActions } from "@convex-dev/auth/react";
+import { standardSchemaResolver } from "@hookform/resolvers/standard-schema";
 import { HugeiconsIcon } from "@hugeicons/react";
 import {
   Envelope,
@@ -15,6 +17,7 @@ import {
   User03Icon,
   Tick01Icon,
 } from "@hugeicons/core-free-icons";
+
 import { Spinner } from "@/components/ui/spinner";
 import { Button } from "@/components/ui/button";
 import {
@@ -36,8 +39,7 @@ import {
   InputGroupAddon,
   InputGroupInput,
 } from "@/components/ui/input-group";
-import { useConvex } from "convex/react";
-import { api } from "@/convex/_generated/api";
+import { logTags } from "@/lib/constants";
 
 const usernameSchema = z
   .string()
@@ -78,9 +80,13 @@ type AuthFlow = "signIn" | "signUp" | "forgotPassword" | "resetVerification";
 export const SignInForm = () => {
   const { signIn } = useAuthActions();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const convex = useConvex();
+  const logMutation = useMutation(api.fx.logs.createLog);
 
-  const [flow, setFlow] = useState<AuthFlow>("signIn");
+  const [flow, setFlow] = useState<AuthFlow>(
+    searchParams.get("strategy") === "create" ? "forgotPassword" : "signIn",
+  );
   const [error, setError] = useState<string | null>(null);
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -119,16 +125,21 @@ export const SignInForm = () => {
 
       // Reset verification
       if (flow === "resetVerification") {
-        await signIn("password", {
-          email: data.email!,
-          code: data.code!,
-          newPassword: data.newPassword!,
-          flow: "reset-verification",
-        });
+        try {
+          await signIn("password", {
+            email: data.email!,
+            code: data.code!,
+            newPassword: data.newPassword!,
+            flow: "reset-verification",
+          });
 
-        toast.success("Password reset successfully. You can now sign in.");
-
-        setFlow("signIn");
+          await logMutation({ tag: logTags.passwordReset, status: "SUCCESS" });
+          toast.success("Password reset successfully. You can now sign in.");
+          setFlow("signIn");
+        } catch (err) {
+          await logMutation({ tag: logTags.passwordReset, status: "FAILED" });
+          throw err;
+        }
 
         return;
       }
@@ -153,7 +164,7 @@ export const SignInForm = () => {
       }
 
       const params: Record<string, string> = {
-        email,
+        email: email || data.email || "",
         flow,
       };
 
@@ -165,7 +176,32 @@ export const SignInForm = () => {
         params.password = data.password;
       }
 
-      await signIn("password", params);
+      try {
+        await signIn("password", params);
+        // On success, the session is established, so logMutation will capture getAuthUserId
+        const identifier = params["username"];
+        const userId = await convex.query(api.fx.users.getUserIdByIdentifier, {
+          identifier,
+        });
+        await logMutation({
+          tag: logTags.signin,
+          status: "SUCCESS",
+          userId: userId || undefined,
+        });
+      } catch (err) {
+        // On failure, try to find the userId to attribute the log
+        const identifier = data.username || data.email || "";
+        const userId = await convex.query(api.fx.users.getUserIdByIdentifier, {
+          identifier,
+        });
+
+        await logMutation({
+          tag: logTags.signin,
+          status: "FAILED",
+          userId: userId || undefined,
+        });
+        throw err;
+      }
 
       router.replace("/onboarding");
     } catch (err) {
@@ -175,6 +211,7 @@ export const SignInForm = () => {
           : "Authentication failed. Try again.";
 
       setError(message);
+      console.log(error)
       toast.error(message);
     }
   };
@@ -208,7 +245,7 @@ export const SignInForm = () => {
   return (
     <Card className="w-full sm:max-w-96">
       <CardHeader className="flex flex-col items-center">
-        <CardTitle>{getTitle()}</CardTitle>
+        <CardTitle className="text-xl font-semibold">{getTitle()}</CardTitle>
         <CardDescription>{getDescription()}</CardDescription>
       </CardHeader>
       <form
@@ -254,7 +291,9 @@ export const SignInForm = () => {
               />
             )}
 
-            {(flow === "resetVerification" || flow === "signUp" || flow === "forgotPassword") && (
+            {(flow === "resetVerification" ||
+              flow === "signUp" ||
+              flow === "forgotPassword") && (
               <Controller
                 name="email"
                 control={control}
@@ -411,11 +450,11 @@ export const SignInForm = () => {
           </FieldGroup>
         </CardContent>
         <CardFooter className="flex flex-col gap-4">
-          {error && (
+          {/* {error && (
             <p className="text-sm text-destructive" role="alert">
               {error}
             </p>
-          )}
+          )} */}
           <Button
             className="w-full"
             type="submit"
@@ -440,7 +479,7 @@ export const SignInForm = () => {
           </Button>
 
           <div className="flex flex-col gap-2 w-full text-center text-sm text-muted-foreground">
-            {(flow === "signIn" || flow === "signUp") && (
+            {/* {(flow === "signIn" || flow === "signUp") && (
               <p>
                 {flow === "signIn"
                   ? "Don't have an account?"
@@ -457,7 +496,7 @@ export const SignInForm = () => {
                   {flow === "signIn" ? "Sign up" : "Sign in"}
                 </button>
               </p>
-            )}
+            )} */}
 
             {(flow === "forgotPassword" || flow === "resetVerification") && (
               <button

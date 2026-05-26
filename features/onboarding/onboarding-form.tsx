@@ -7,7 +7,7 @@ import { useRouter } from "next/navigation";
 import { useMutation } from "convex/react";
 
 import { api } from "@/convex/_generated/api";
-import { systemRoles } from "@/lib/constants";
+import { logTags, systemRoles } from "@/lib/constants";
 import { standardSchemaResolver } from "@hookform/resolvers/standard-schema";
 import { HugeiconsIcon } from "@hugeicons/react";
 import {
@@ -60,6 +60,7 @@ export const OnboardingForm = ({ role }: Props) => {
   const router = useRouter();
   const createProfile = useMutation(api.fx.profile.create);
   const updateProfile = useMutation(api.fx.profile.update);
+  const logMutation = useMutation(api.fx.logs.createLog);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: standardSchemaResolver(formSchema),
@@ -79,7 +80,12 @@ export const OnboardingForm = ({ role }: Props) => {
   const onSubmit = async (data: z.infer<typeof formSchema>) => {
     try {
       try {
-        await createProfile({ role: [systemRoles.student] });
+        await createProfile({ role: [systemRoles[3]] });
+        await logMutation({
+          tag: logTags.createProfile,
+          status: "SUCCESS",
+          collectionIdentifier: "Profile",
+        });
       } catch (error) {
         const message = error instanceof Error ? error.message : "";
         if (!message.includes("Profile already exists")) {
@@ -93,9 +99,19 @@ export const OnboardingForm = ({ role }: Props) => {
         telephone: data.telephone,
       });
 
+      await logMutation({
+        tag: logTags.updateProfile,
+        status: "SUCCESS",
+        collectionIdentifier: "Profile",
+      });
       toast.success("Profile saved");
       router.replace("/");
     } catch (error) {
+      await logMutation({
+        tag: logTags.updateProfile,
+        status: "FAILED",
+        collectionIdentifier: "Profile",
+      });
       const message =
         error instanceof Error
           ? error.message
@@ -213,7 +229,7 @@ export const OnboardingForm = ({ role }: Props) => {
                       aria-invalid={fieldState.invalid}
                       placeholder="999888777"
                       autoComplete="off"
-                      type="number"
+                      type="tel"
                     />
                   </InputGroup>
                   {fieldState.invalid && (

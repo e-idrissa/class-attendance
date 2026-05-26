@@ -11,6 +11,7 @@ import {
 import { HugeiconsIcon } from "@hugeicons/react";
 import { PlusSignCircleIcon, Mail01Icon } from "@hugeicons/core-free-icons";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 export function NavMain({
   items,
@@ -21,6 +22,8 @@ export function NavMain({
     icon?: React.ReactNode;
   }[];
 }) {
+  const router = useRouter();
+
   return (
     <SidebarGroup>
       <SidebarGroupContent className="flex flex-col gap-2">
@@ -33,7 +36,10 @@ export function NavMain({
               <HugeiconsIcon icon={PlusSignCircleIcon} strokeWidth={2} />
               <span>Quick Create</span>
             </SidebarMenuButton>
-            <Link href="https://mail.google.com/mail/u/0/#search/ASys" target="blank">
+            <Link
+              href="https://mail.google.com/mail/u/0/#search/ASys"
+              target="blank"
+            >
               <Button
                 size="icon"
                 className="size-8 group-data-[collapsible=icon]:opacity-0"
@@ -47,7 +53,10 @@ export function NavMain({
         </SidebarMenu>
         <SidebarMenu>
           {items.map((item) => (
-            <SidebarMenuItem key={item.title}>
+            <SidebarMenuItem
+              key={item.title}
+              onClick={() => router.push(item.url)}
+            >
               <SidebarMenuButton tooltip={item.title}>
                 {item.icon}
                 <span>{item.title}</span>

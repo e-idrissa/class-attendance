@@ -1,9 +1,9 @@
 "use client";
 
-import { NavDocuments } from "@/features/dashboard/nav-documents";
-import { NavMain } from "@/features/dashboard/nav-main";
-import { NavSecondary } from "@/features/dashboard/nav-secondary";
-import { NavUser } from "@/features/dashboard/nav-user";
+import { NavDocuments } from "@/components/global/nav-documents";
+import { NavMain } from "@/components/global/nav-main";
+import { NavSecondary } from "@/components/global/nav-secondary";
+import { NavUser } from "@/components/global/nav-user";
 import {
   Sidebar,
   SidebarContent,
@@ -36,7 +36,7 @@ const data = {
   navMain: [
     {
       title: "Dashboard",
-      url: "#",
+      url: "/",
       icon: <HugeiconsIcon icon={DashboardSquare01Icon} strokeWidth={2} />,
     },
     {
@@ -55,8 +55,8 @@ const data = {
       icon: <HugeiconsIcon icon={Folder01Icon} strokeWidth={2} />,
     },
     {
-      title: "Team",
-      url: "#",
+      title: "Users",
+      url: "/users",
       icon: <HugeiconsIcon icon={UserGroupIcon} strokeWidth={2} />,
     },
   ],

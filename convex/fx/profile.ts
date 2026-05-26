@@ -1,13 +1,13 @@
-import { mutation } from "../_generated/server";
+import { mutation, query } from "../_generated/server";
 import { ConvexError, v } from "convex/values";
-import { getAuthUserId, } from "@convex-dev/auth/server";
+import { getAuthUserId } from "@convex-dev/auth/server";
 
-const DEFAULT_ROLE = ["STUDENT"] as const;
+const DEFAULT_ROLE = "STUDENT" as const;
 
 /** Create the signed-in user's profile (onboarding). Fails if one already exists. */
 export const create = mutation({
-  args: { 
-    role: v.array(v.string()) 
+  args: {
+    role: v.array(v.string()),
   },
   handler: async (ctx, args) => {
     const userId = await getAuthUserId(ctx);
@@ -26,7 +26,8 @@ export const create = mutation({
 
     await ctx.db.insert("profiles", {
       userId,
-      role: args.role ?? [...DEFAULT_ROLE],
+      role: args.role ?? [DEFAULT_ROLE],
+      isShepherd: false
     });
   },
 });
@@ -37,7 +38,8 @@ export const update = mutation({
     firstName: v.optional(v.string()),
     lastName: v.optional(v.string()),
     telephone: v.optional(v.string()),
-    role: v.optional(v.array(v.string())),
+    role: v.optional(v.string()),
+    isShepherd: v.optional(v.boolean()),
     classes: v.optional(v.array(v.string())),
   },
   handler: async (ctx, args) => {
@@ -60,13 +62,15 @@ export const update = mutation({
       lastName?: string;
       telephone?: string;
       role?: string[];
+      isShepherd?: boolean;
       classes?: string[];
     } = {};
 
     if (args.firstName !== undefined) patch.firstName = args.firstName;
     if (args.lastName !== undefined) patch.lastName = args.lastName;
     if (args.telephone !== undefined) patch.telephone = args.telephone;
-    if (args.role !== undefined) patch.role = args.role;
+    if (args.role !== undefined) patch.role = [args.role];
+    if (args.isShepherd !== undefined) patch.isShepherd = args.isShepherd;
     if (args.classes !== undefined) patch.classes = args.classes;
 
     if (Object.keys(patch).length === 0) {
@@ -75,5 +79,20 @@ export const update = mutation({
 
     await ctx.db.patch(profile._id, patch);
     return profile._id;
+  },
+});
+
+/** Get user Profile by ID */
+export const getUserProfile = query({
+  args: {
+    id: v.id("users"),
+  },
+  handler: async (ctx, args) => {
+    const profile = await ctx.db
+      .query("profiles")
+      .withIndex("by_userId", (q) => q.eq("userId", args.id))
+      .first();
+
+    return profile;
   },
 });

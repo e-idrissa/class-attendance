@@ -22,14 +22,16 @@ export default defineSchema({
 
   logs: defineTable({
     tag: v.string(),
-    author: v.string(),
+    author: v.id("users"),
     date: v.string(),
     time: v.string(),
     status: v.union(v.literal("SUCCESS"), v.literal("FAILED")),
     data: v.object({
-      attendanceSlug: v.string(),
+      collectionIdentifier: v.string(),
     }),
-  }).index("by_date", ["date"]),
+  })
+    .index("by_date", ["date"])
+    .index("by_author_date", ["author", "date"]),
 
   profiles: defineTable({
     userId: v.id("users"),
@@ -38,5 +40,6 @@ export default defineSchema({
     lastName: v.optional(v.string()),
     firstName: v.optional(v.string()),
     classes: v.optional(v.array(v.string())),
+    isShepherd: v.optional(v.boolean())
   }).index("by_userId", ["userId"]),
 });

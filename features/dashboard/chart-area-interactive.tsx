@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/set-state-in-effect */
 "use client"
 
 import * as React from "react"
@@ -136,7 +137,7 @@ const chartConfig = {
   },
   mobile: {
     label: "Mobile",
-    color: "var(--primary)",
+    color: "var(--color-green-400)",
   },
 } satisfies ChartConfig
 
