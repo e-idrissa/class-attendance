@@ -45,7 +45,7 @@ const OnboardingPage = () => {
   }
 
   const { profile } = data;
-  const role = profile?.role[0] ?? systemRoles.student;
+  const role = profile?.role[0] ?? systemRoles[0];
 
   return (
     <div className="flex flex-col gap-8 w-full max-w-lg mx-auto h-screen justify-center items-center px-4">
