@@ -81,6 +81,11 @@ export const OnboardingForm = ({ role }: Props) => {
     try {
       try {
         await createProfile({ role: [systemRoles[3]] });
+        await logMutation({
+          tag: logTags.createProfile,
+          status: "SUCCESS",
+          collectionIdentifier: "Profile",
+        });
       } catch (error) {
         const message = error instanceof Error ? error.message : "";
         if (!message.includes("Profile already exists")) {
@@ -97,7 +102,7 @@ export const OnboardingForm = ({ role }: Props) => {
       await logMutation({
         tag: logTags.updateProfile,
         status: "SUCCESS",
-        collectionIdentifier: "collectionIdentifier",
+        collectionIdentifier: "Profile",
       });
       toast.success("Profile saved");
       router.replace("/");
@@ -105,7 +110,7 @@ export const OnboardingForm = ({ role }: Props) => {
       await logMutation({
         tag: logTags.updateProfile,
         status: "FAILED",
-        collectionIdentifier: "collectionIdentifier",
+        collectionIdentifier: "Profile",
       });
       const message =
         error instanceof Error

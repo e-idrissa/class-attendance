@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { z } from "zod";
 import { toast } from "sonner";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useConvex, useMutation } from "convex/react";
 
 import { api } from "@/convex/_generated/api";
@@ -80,10 +80,13 @@ type AuthFlow = "signIn" | "signUp" | "forgotPassword" | "resetVerification";
 export const SignInForm = () => {
   const { signIn } = useAuthActions();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const convex = useConvex();
   const logMutation = useMutation(api.fx.logs.createLog);
 
-  const [flow, setFlow] = useState<AuthFlow>("signIn");
+  const [flow, setFlow] = useState<AuthFlow>(
+    searchParams.get("strategy") === "create" ? "forgotPassword" : "signIn",
+  );
   const [error, setError] = useState<string | null>(null);
 
   const form = useForm<z.infer<typeof formSchema>>({

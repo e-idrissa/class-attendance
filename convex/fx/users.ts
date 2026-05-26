@@ -1,7 +1,7 @@
-import { query } from "../_generated/server";
+import { mutation, query } from "../_generated/server";
 import { getAuthUserId } from "@convex-dev/auth/server";
 import { normalizeUsername } from "../utils";
-import { v } from "convex/values";
+import { ConvexError, v } from "convex/values";
 
 /** Specified user's `users` document */
 export const getUserEmailByUsername = query({
@@ -14,9 +14,7 @@ export const getUserEmailByUsername = query({
 
     const user = await ctx.db
       .query("users")
-      .withIndex("by_username", (q) =>
-        q.eq("username", username)
-      )
+      .withIndex("by_username", (q) => q.eq("username", username))
       .unique();
 
     return user?.email ?? null;
@@ -81,5 +79,51 @@ export const getUserIdByIdentifier = query({
       .unique();
 
     return byEmail?._id ?? null;
+  },
+});
+
+/** Create a new user with the username and the email */
+export const createUser = mutation({
+  args: {
+    username: v.string(),
+    email: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const username = normalizeUsername(args.username);
+    const email = args.email.trim().toLowerCase();
+
+    // 1. Check if username is taken
+    const existingUsername = await ctx.db
+      .query("users")
+      .withIndex("by_username", (q) => q.eq("username", username))
+      .unique();
+
+    if (existingUsername !== null) {
+      throw new ConvexError("Username already taken");
+    }
+
+    // 2. Check if email is taken
+    const existingEmail = await ctx.db
+      .query("users")
+      .withIndex("by_email", (q) => q.eq("email", email))
+      .unique();
+
+    if (existingEmail !== null) {
+      throw new ConvexError("Email already registered");
+    }
+
+    // 3. Insert the user record
+    const userId = await ctx.db.insert("users", {
+      username,
+      email,
+    });
+
+    // 4. Create an associated profile with default student role
+    await ctx.db.insert("profiles", {
+      userId,
+      role: ["STUDENT"],
+    });
+
+    return userId;
   },
 });

@@ -1,9 +1,19 @@
-import React from 'react'
+import { NewUserForm } from "@/features/users/new-user-form";
+import tableData from "../data.json";
 
-const page = () => {
+import { UsersSectionCards } from "@/features/users/users-section-cards";
+import { UsersTable } from "@/features/users/users-table";
+
+const UsersPage = () => {
   return (
-    <div>page</div>
-  )
-}
+    <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
+      <UsersSectionCards />
+      <div className="flex flex-col lg:flex-row">
+        <UsersTable data={tableData} />
+        <NewUserForm />
+      </div>
+    </div>
+  );
+};
 
-export default page
+export default UsersPage;
