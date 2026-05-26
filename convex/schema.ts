@@ -40,5 +40,6 @@ export default defineSchema({
     lastName: v.optional(v.string()),
     firstName: v.optional(v.string()),
     classes: v.optional(v.array(v.string())),
+    isShepherd: v.optional(v.boolean())
   }).index("by_userId", ["userId"]),
 });

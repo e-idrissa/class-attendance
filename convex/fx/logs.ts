@@ -35,7 +35,7 @@ export const createLog = mutation({
       time: time,
       status: args.status,
       data: {
-        collectionIdentifier: args.collectionIdentifier ?? "auth",
+        collectionIdentifier: args.collectionIdentifier ?? "Auth",
       },
     });
   },
@@ -53,6 +53,6 @@ export const getLatestLogs = query({
       .query("logs")
       .withIndex("by_author_date", (q) => q.eq("author", userId))
       .order("desc")
-      .take(5);
+      .take(7);
   },
 });

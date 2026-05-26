@@ -28,6 +28,7 @@ const ProfilePage = () => {
           telephone={profile?.telephone}
           role={profile?.role[0]}
           email={user.email}
+          isShepherd={!profile?.isShepherd}
         />
       </div>
       <div className="w-full lg:w-1/2">

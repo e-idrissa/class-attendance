@@ -39,6 +39,7 @@ import {
   InputGroupAddon,
   InputGroupInput,
 } from "@/components/ui/input-group";
+import { logTags } from "@/lib/constants";
 
 const usernameSchema = z
   .string()
@@ -129,11 +130,11 @@ export const SignInForm = () => {
             flow: "reset-verification",
           });
 
-          await logMutation({ tag: "PASSWORD_RESET", status: "SUCCESS" });
+          await logMutation({ tag: logTags.passwordReset, status: "SUCCESS" });
           toast.success("Password reset successfully. You can now sign in.");
           setFlow("signIn");
         } catch (err) {
-          await logMutation({ tag: "PASSWORD_RESET", status: "FAILED" });
+          await logMutation({ tag: logTags.passwordReset, status: "FAILED" });
           throw err;
         }
 
@@ -180,7 +181,7 @@ export const SignInForm = () => {
           identifier,
         });
         await logMutation({
-          tag: "SIGN_IN",
+          tag: logTags.signin,
           status: "SUCCESS",
           userId: userId || undefined,
         });
@@ -192,7 +193,7 @@ export const SignInForm = () => {
         });
 
         await logMutation({
-          tag: "SIGN_IN",
+          tag: logTags.signin,
           status: "FAILED",
           userId: userId || undefined,
         });
@@ -207,6 +208,7 @@ export const SignInForm = () => {
           : "Authentication failed. Try again.";
 
       setError(message);
+      console.log(error)
       toast.error(message);
     }
   };
@@ -445,11 +447,11 @@ export const SignInForm = () => {
           </FieldGroup>
         </CardContent>
         <CardFooter className="flex flex-col gap-4">
-          {error && (
+          {/* {error && (
             <p className="text-sm text-destructive" role="alert">
               {error}
             </p>
-          )}
+          )} */}
           <Button
             className="w-full"
             type="submit"
@@ -474,7 +476,7 @@ export const SignInForm = () => {
           </Button>
 
           <div className="flex flex-col gap-2 w-full text-center text-sm text-muted-foreground">
-            {(flow === "signIn" || flow === "signUp") && (
+            {/* {(flow === "signIn" || flow === "signUp") && (
               <p>
                 {flow === "signIn"
                   ? "Don't have an account?"
@@ -491,7 +493,7 @@ export const SignInForm = () => {
                   {flow === "signIn" ? "Sign up" : "Sign in"}
                 </button>
               </p>
-            )}
+            )} */}
 
             {(flow === "forgotPassword" || flow === "resetVerification") && (
               <button

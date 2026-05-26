@@ -1,17 +1,19 @@
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import {
-  InputGroup,
-  InputGroupAddon,
-  InputGroupInput,
-} from "@/components/ui/input-group";
-import {
+  Award05Icon,
   Key01Icon,
   Shield01Icon,
   User03Icon,
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
+
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent } from "@/components/ui/card";
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+} from "@/components/ui/input-group";
+import { EditProfile } from "@/features/profile/edit-profile";
 
 interface Props {
   firstName: string | undefined;
@@ -19,6 +21,7 @@ interface Props {
   telephone: string | undefined;
   role: string | undefined;
   email: string | undefined;
+  isShepherd: boolean;
 }
 
 export const Identity = ({
@@ -27,14 +30,25 @@ export const Identity = ({
   telephone,
   role,
   email,
+  isShepherd,
 }: Props) => {
+  console.log(firstName, lastName, telephone, role, email, isShepherd);
   return (
     <Card>
       <CardContent className="flex flex-col items-center gap-4">
         <div className="flex flex-col items-center gap-4">
           <div className="flex flex-col items-center gap-2">
-            <div className="p-4 flex items-center justify-center rounded-md bg-gray-100">
-              <HugeiconsIcon icon={User03Icon} size={56} strokeWidth={1.5} />
+            <div className="relative w-full">
+              <div className="p-8 flex items-center justify-center rounded-full bg-gray-100">
+                <HugeiconsIcon icon={User03Icon} size={64} strokeWidth={1.5} />
+              </div>
+              <EditProfile
+                firstname={firstName}
+                lastName={lastName}
+                telephone={telephone}
+                role={role}
+                isShepherd={isShepherd}
+              />
             </div>
             <Badge variant={"role"}>
               <HugeiconsIcon
@@ -45,6 +59,17 @@ export const Identity = ({
               />
               <span className="lowercase">{role}</span>
             </Badge>
+            {isShepherd && (
+              <Badge variant={"gold"}>
+                <HugeiconsIcon
+                  icon={Award05Icon}
+                  size={20}
+                  strokeWidth={2}
+                  className="transition-colors"
+                />
+                <span className="lowercase">Shepherd</span>
+              </Badge>
+            )}
           </div>
           <div className="flex flex-col items-center">
             <h3 className="text-xl font-semibold">{`${firstName} ${lastName}`}</h3>
@@ -64,13 +89,14 @@ export const Identity = ({
             <InputGroupAddon>
               <HugeiconsIcon icon={Key01Icon} strokeWidth={1.5} />
             </InputGroupAddon>
-            <InputGroupInput type="password" disabled value={"••••••••"} />
+            <InputGroupInput
+              type="password"
+              disabled
+              value={"••••••••••••••••"}
+            />
           </InputGroup>
         </div>
       </CardContent>
-        <CardFooter>
-          <Button className="w-full">Update Profile</Button>
-        </CardFooter>
     </Card>
   );
 };

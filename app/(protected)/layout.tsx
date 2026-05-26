@@ -1,5 +1,14 @@
-import { SiteHeader } from "@/features/dashboard/site-header";
-import { AppSidebar } from "@/features/dashboard/app-sidebar";
+"use client";
+
+import { useRouter } from "next/navigation";
+import { useConvexAuth, useQuery } from "convex/react";
+import { useEffect } from "react";
+
+import { api } from "@/convex/_generated/api";
+import { isOnboardingComplete } from "@/lib/profile";
+
+import { SiteHeader } from "@/components/global/site-header";
+import { AppSidebar } from "@/components/global/app-sidebar";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 
 export default function ProtectedLayout({
@@ -7,6 +16,23 @@ export default function ProtectedLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const router = useRouter();
+  const { isAuthenticated } = useConvexAuth();
+  const data = useQuery(
+    api.fx.users.currentUserWithProfile,
+    isAuthenticated ? {} : "skip",
+  );
+
+  useEffect(() => {
+    if (
+      data !== undefined &&
+      data !== null &&
+      !isOnboardingComplete(data.profile)
+    ) {
+      router.replace("/onboarding");
+    }
+  }, [data, router]);
+
   return (
     <SidebarProvider
       style={
