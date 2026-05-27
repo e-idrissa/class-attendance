@@ -1,37 +1,33 @@
 import { Resend } from "resend";
+import { v } from "convex/values";
+import { action } from "./_generated/server";
 
 const resend = new Resend(process.env.AUTH_RESEND_KEY!);
 
-export const PasswordReset = {
-  id: "password-reset",
-  type: "email" as const,
-  name: "Password Reset",
-
-  async sendVerificationRequest({
-    identifier: email,
-    token,
-  }: {
-    identifier: string;
-    token: string;
-    expires: Date;
-  }) {
+export const sendOnboardingEmail = action({
+  args: {
+    email: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const baseUrl = process.env.BASE_URL ?? "http://localhost:3000";
+    const connectionLink = `${baseUrl}/signin?strategy=create`;
     const logoUrl = "";
 
     const { error } = await resend.emails.send({
       from: process.env.EMAIL_FROM ?? "ASys <onboarding@resend.dev>",
-      to: email,
-      subject: "Reset your password",
+      to: args.email,
+      subject: "Welcome to ASys - Your account is ready",
       html: `
         <!DOCTYPE html>
         <html>
           <head>
             <meta charset="utf-8">
             <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <title>Reset your Password</title>
+            <title>Welcome to ASys</title>
           </head>
-          <body style="margin: 0; padding: 32px; background-color: ##ffffff; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
+          <body style="margin: 0; padding: 16px; background-color: #ffffff; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
             
-            <div style="padding: 24px; margin: 12px 0px; border: 1px solid #e2e8f0; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+            <div style="padding: 24px; margin: 0px 0px; border: 1px solid #e2e8f0; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
               
               <!-- ENTÊTE -->
               <div style="margin-bottom: 30px; border-bottom: 1px solid #e2e8f0; padding-bottom: 16px;">
@@ -69,21 +65,24 @@ export const PasswordReset = {
               <!-- CONTENU PRINCIPAL -->
               <div style="margin-bottom: 40px;">
                 <h2 style="margin: 0 0 8px 0; font-size: 20px; font-weight: 600; color: #1e293b;">
-                  Reset your Password
+                  Welcome to ASys!
                 </h2>
                 <p style="margin: 0 0 16px 0; font-size: 15px; color: #475569; line-height: 24px;">
-                  We received a request for your password modification. Use the code below to set a new password:
+                  Your account has been successfully created. Click the button below to set up your password and access your dashboard:
                 </p>
                 
-                <!-- BLOC CODE DE SÉCURITÉ -->
-                <p style="margin: 0 0 24px 0;">
-                  <code style="font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; font-size: 15px; font-weight: 600; color: #1d4ed8; letter-spacing: 1px;">
-                    ${token}
-                  </code>
-                </p>
+                <!-- BOUTON DE CONNEXION -->
+                <div style="margin: 24px 0;">
+                  <a href="${connectionLink}" style="display: inline-block; padding: 12px 24px; background-color: #2563eb; color: #ffffff; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 15px;">
+                    Connect to your account
+                  </a>
+                </div>
                 
                 <p style="margin: 0; font-size: 15px; color: #475569; line-height: 24px;">
-                  If this request does not come from you, safely ignore this email.
+                  If the button doesn't work, you can also copy and paste this link into your browser:
+                </p>
+                <p style="margin: 8px 0 0 0; font-size: 14px; color: #1d4ed8; word-break: break-all;">
+                  ${connectionLink}
                 </p>
               </div>
 
@@ -109,4 +108,4 @@ export const PasswordReset = {
       throw new Error(error.message);
     }
   },
-};
+});

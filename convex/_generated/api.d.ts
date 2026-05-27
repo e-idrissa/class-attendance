@@ -14,6 +14,7 @@ import type * as fx_profile from "../fx/profile.js";
 import type * as fx_usernames from "../fx/usernames.js";
 import type * as fx_users from "../fx/users.js";
 import type * as http from "../http.js";
+import type * as onboarding from "../onboarding.js";
 import type * as passwordReset from "../passwordReset.js";
 import type * as utils from "../utils.js";
 
@@ -30,6 +31,7 @@ declare const fullApi: ApiFromModules<{
   "fx/usernames": typeof fx_usernames;
   "fx/users": typeof fx_users;
   http: typeof http;
+  onboarding: typeof onboarding;
   passwordReset: typeof passwordReset;
   utils: typeof utils;
 }>;

@@ -42,7 +42,9 @@ export const ActivityTable = () => {
         </TableHeader>
         <TableBody>
           {logs.length === 0 ? (
-            <TableRow>No Recents Activities yet.</TableRow>
+            <TableRow>
+              <TableCell>No Recents Activities yet.</TableCell>
+            </TableRow>
           ) : (
             logs.map((item) => (
               <TableRow key={item._creationTime}>

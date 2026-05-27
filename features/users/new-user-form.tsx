@@ -11,7 +11,7 @@ import {
   CardTitle,
   CardFooter,
 } from "@/components/ui/card";
-import { useMutation } from "convex/react";
+import { useMutation, useAction } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Controller, useForm } from "react-hook-form";
 import { standardSchemaResolver } from "@hookform/resolvers/standard-schema";
@@ -47,6 +47,7 @@ const formSchema = z.object({
 export const NewUserForm = () => {
   const createUser = useMutation(api.fx.users.createUser);
   const logMutation = useMutation(api.fx.logs.createLog);
+  const sendOnboardingEmail = useAction(api.onboarding.sendOnboardingEmail);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: standardSchemaResolver(formSchema),
@@ -68,7 +69,10 @@ export const NewUserForm = () => {
       await createUser({
         username: data.username,
         email: data.email,
+        role: data.role
       });
+      // await sendOnboardingEmail({ email: data.email });
+      await sendOnboardingEmail({ email: "id.hemedy98@gmail.com" });
       await logMutation({
         tag: logTags.createUser,
         status: "SUCCESS",

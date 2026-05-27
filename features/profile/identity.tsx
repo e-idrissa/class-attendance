@@ -43,7 +43,7 @@ export const Identity = ({
                 <HugeiconsIcon icon={User03Icon} size={64} strokeWidth={1.5} />
               </div>
               <EditProfile
-                firstname={firstName}
+                firstName={firstName}
                 lastName={lastName}
                 telephone={telephone}
                 role={role}

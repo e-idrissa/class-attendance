@@ -1,6 +1,9 @@
 import { mutation, query } from "../_generated/server";
 import { ConvexError, v } from "convex/values";
 import { getAuthUserId } from "@convex-dev/auth/server";
+import { normalizeUsername } from "../utils";
+import { logInternal } from "./logs";
+import { logTags } from "../../lib/constants";
 
 const DEFAULT_ROLE = "STUDENT" as const;
 
@@ -21,6 +24,12 @@ export const create = mutation({
       .first();
 
     if (existing !== null) {
+      await logInternal(ctx, {
+        tag: logTags.createProfile,
+        status: "FAILED",
+        author: userId,
+        collectionIdentifier: "Profiles",
+      });
       throw new ConvexError("Profile already exists");
     }
 
@@ -28,6 +37,13 @@ export const create = mutation({
       userId,
       role: args.role ?? [DEFAULT_ROLE],
       isShepherd: false
+    });
+
+    await logInternal(ctx, {
+      tag: logTags.createProfile,
+      status: "SUCCESS",
+      author: userId,
+      collectionIdentifier: "Profiles",
     });
   },
 });
@@ -54,6 +70,12 @@ export const update = mutation({
       .first();
 
     if (profile === null) {
+      await logInternal(ctx, {
+        tag: logTags.updateProfile,
+        status: "FAILED",
+        author: userId,
+        collectionIdentifier: "Profiles",
+      });
       throw new ConvexError("Profile not found");
     }
 
@@ -78,6 +100,14 @@ export const update = mutation({
     }
 
     await ctx.db.patch(profile._id, patch);
+
+    await logInternal(ctx, {
+      tag: logTags.updateProfile,
+      status: "SUCCESS",
+      author: userId,
+      collectionIdentifier: "Profiles",
+    });
+
     return profile._id;
   },
 });
@@ -95,4 +125,59 @@ export const getUserProfile = query({
 
     return profile;
   },
+});
+
+export const makeLeader = mutation({
+  args: {
+    username: v.string()
+  },
+  handler: async (ctx, args) => {
+    const authenticatedUserId = await getAuthUserId(ctx);
+    if (authenticatedUserId === null) {
+      throw new ConvexError("Not signed in");
+    }
+
+    const username = normalizeUsername(args.username);
+
+    const user = await ctx.db
+      .query("users")
+      .withIndex("by_username", (q) => q.eq("username", username))
+      .unique();
+
+    if (user === null) {
+      await logInternal(ctx, {
+        tag: logTags.updateUser,
+        status: "FAILED",
+        author: authenticatedUserId,
+        collectionIdentifier: "Users",
+      });
+      return null;
+    }
+
+    const profile = await ctx.db
+      .query("profiles")
+      .withIndex("by_userId", (q) => q.eq("userId", user._id))
+      .unique();
+
+    if (profile === null) {
+      await logInternal(ctx, {
+        tag: logTags.updateProfile,
+        status: "FAILED",
+        author: authenticatedUserId,
+        collectionIdentifier: "Profiles",
+      });
+      return null;
+    }
+
+    await ctx.db.patch(profile._id, { role: ["LEADER"] });
+
+    await logInternal(ctx, {
+      tag: logTags.updateProfile,
+      status: "SUCCESS",
+      author: authenticatedUserId,
+      collectionIdentifier: "Profiles",
+    });
+
+    return { success: true };
+  }
 });
