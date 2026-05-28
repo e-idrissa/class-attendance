@@ -1,6 +1,34 @@
 import { v } from "convex/values";
-import { mutation, query } from "../_generated/server";
+import { mutation, query, internalMutation } from "../_generated/server";
 import { getAuthUserId } from "@convex-dev/auth/server";
+import { Doc, Id } from "../_generated/dataModel";
+
+export async function logInternal(
+  ctx: { db: any },
+  args: {
+    tag: string;
+    status: "SUCCESS" | "FAILED";
+    author: Id<"users">;
+    collectionIdentifier?: string;
+  },
+) {
+  const now = new Date();
+  const date = now.toISOString().split("T")[0];
+  const hours = now.getHours().toString().padStart(2, "0");
+  const minutes = now.getMinutes().toString().padStart(2, "0");
+  const time = `${hours}:${minutes}`;
+
+  await ctx.db.insert("logs", {
+    tag: args.tag,
+    author: args.author,
+    date: date,
+    time: time,
+    status: args.status,
+    data: {
+      collectionIdentifier: args.collectionIdentifier ?? "Auth",
+    },
+  });
+}
 
 export const createLog = mutation({
   args: {
@@ -14,29 +42,14 @@ export const createLog = mutation({
     const author = args.userId ?? authenticatedUserId;
 
     if (!author) {
-      // We can't log without an author based on the current schema
       return;
     }
 
-    const now = new Date();
-    
-    // Format date: YYYY-MM-DD
-    const date = now.toISOString().split("T")[0];
-    
-    // Format time: HH:mm (e.g., 14:56)
-    const hours = now.getHours().toString().padStart(2, "0");
-    const minutes = now.getMinutes().toString().padStart(2, "0");
-    const time = `${hours}:${minutes}`;
-
-    await ctx.db.insert("logs", {
+    await logInternal(ctx, {
       tag: args.tag,
-      author: author,
-      date: date,
-      time: time,
       status: args.status,
-      data: {
-        collectionIdentifier: args.collectionIdentifier ?? "Auth",
-      },
+      author,
+      collectionIdentifier: args.collectionIdentifier,
     });
   },
 });

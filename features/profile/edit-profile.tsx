@@ -47,7 +47,7 @@ import { Spinner } from "@/components/ui/spinner";
 import { useState } from "react";
 
 interface ProfileFormProps {
-  firstname: string | undefined;
+  firstName: string | undefined;
   lastName: string | undefined;
   telephone: string | undefined;
   role: string | undefined;
@@ -72,7 +72,7 @@ const formSchema = z.object({
 });
 
 export const EditProfile = ({
-  firstname,
+  firstName,
   lastName,
   telephone,
   role,
@@ -86,7 +86,7 @@ export const EditProfile = ({
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: standardSchemaResolver(formSchema),
     defaultValues: {
-      firstName: firstname || "",
+      firstName: firstName || "",
       lastName: lastName || "",
       telephone: telephone || "",
       role: role || "",
