@@ -1,6 +1,8 @@
 import { Resend } from "resend";
 import { v } from "convex/values";
+import { Id } from "./_generated/dataModel";
 import { action } from "./_generated/server";
+import { getFileUrl } from "./utils";
 
 const resend = new Resend(process.env.AUTH_RESEND_KEY!);
 
@@ -11,7 +13,9 @@ export const sendOnboardingEmail = action({
   handler: async (ctx, args) => {
     const baseUrl = process.env.BASE_URL ?? "http://localhost:3000";
     const connectionLink = `${baseUrl}/signin?strategy=create`;
-    const logoUrl = "";
+    
+    const logoId = process.env.APP_LOGO_ID as Id<"_storage"> | undefined;
+    const logoUrl = logoId ? await getFileUrl(ctx, logoId) : null;
 
     const { error } = await resend.emails.send({
       from: process.env.EMAIL_FROM ?? "ASys <onboarding@resend.dev>",

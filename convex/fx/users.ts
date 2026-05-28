@@ -209,24 +209,6 @@ export const removeUser = mutation({
       await ctx.db.delete(profile._id);
     }
 
-    // 2. Delete sessions
-    const sessions = await ctx.db
-      .query("sessions")
-      .withIndex("by_userId", (q) => q.eq("userId", args.userId))
-      .collect();
-    for (const session of sessions) {
-      await ctx.db.delete(session._id);
-    }
-
-    // 3. Delete accounts
-    const accounts = await ctx.db
-      .query("accounts")
-      .withIndex("by_userId", (q) => q.eq("userId", args.userId))
-      .collect();
-    for (const account of accounts) {
-      await ctx.db.delete(account._id);
-    }
-
     // 4. Delete user
     await ctx.db.delete(args.userId);
 

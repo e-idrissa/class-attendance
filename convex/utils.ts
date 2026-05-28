@@ -1,3 +1,6 @@
+import { ActionCtx, MutationCtx, QueryCtx } from "./_generated/server";
+import { Id } from "./_generated/dataModel";
+
 /** Normalize usernames so sign-up and sign-in use the same account id. */
 export function normalizeUsername(raw: string): string {
   return raw.trim().toLowerCase();
@@ -9,46 +12,10 @@ export function isValidUsername(username: string): boolean {
   return USERNAME_PATTERN.test(username);
 }
 
-export async function sendEmail({
-  to,
-  subject,
-  html,
-}: {
-  to: string;
-  subject: string;
-  html: string;
-}) {
-  const apiUrl = process.env.BREVO_API_URL!
-  const apiKey = process.env.BREVO_API_KEY!
-
-  const res = await fetch(apiUrl, {
-    method: "POST",
-    headers: {
-      "api-key": apiKey,
-      "Content-Type": "application/json",
-      accept: "application/json",
-    },
-    body: JSON.stringify({
-      sender: {
-        name: "ASys",
-        email: "noreply@asys.com",
-      },
-      to: [
-        {
-          email: to,
-        },
-      ],
-      subject,
-      htmlContent: html,
-    }),
-  });
-
-  const data = await res.json();
-
-  if (!res.ok) {
-    console.error("Brevo error:", data);
-    throw new Error("Email sending failed");
-  }
-
-  return data;
+/** Get the public URL for a file stored in Convex storage. */
+export async function getFileUrl(
+  ctx: QueryCtx | MutationCtx | ActionCtx,
+  storageId: Id<"_storage">,
+) {
+  return await ctx.storage.getUrl(storageId);
 }
